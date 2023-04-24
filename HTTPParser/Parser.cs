@@ -58,7 +58,7 @@ public class Parser
                     continue;
                 }
 
-                if (i > 0 && splitted[i - 1].ToCharArray().Last() == ':' && bodyStartIndex != 0)
+                if (i > 0 && splitted[i - 1].ToCharArray().Last() == ':' && bodyStartIndex == 0)
                 {
                     request.Headers.Add($"{splitted[i - 1]}{splitted[i]}");
                 }
