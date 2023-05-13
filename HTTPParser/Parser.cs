@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace HTTPParser;
 
 public class Parser
@@ -60,7 +62,7 @@ public class Parser
 
                 if (i > 0 && splitted[i - 1].ToCharArray().Last() == ':' && bodyStartIndex == 0)
                 {
-                    request.Headers.Add($"{splitted[i - 1]}{splitted[i]}");
+                    request.Headers.Add(new Tuple<string, string>(splitted[i - 1].Replace(":",""),splitted[i]));
                 }
 
                 if(splitted[i] == "{")            
@@ -77,4 +79,29 @@ public class Parser
             }
             return requests;
         }
+
+        public string SendRequest(Request request)
+        {
+            var client = new HttpClient();
+            
+            foreach (var header in request.Headers)
+            {
+                client.DefaultRequestHeaders.Add(header.Item1,header.Item2);
+            }
+            
+            return Convert.ToString(request.Type switch 
+            {
+              "GET" => client.GetAsync(request.Url),
+              "POST" =>
+                  () =>
+                  {
+                      var body = new StringContent(request.Body, Encoding.UTF8, "application/json");
+                      return client.PostAsync(request.Url, body).Result.ToString();
+                  }
+                  
+            });
+        }
+        
+     
+        
 }

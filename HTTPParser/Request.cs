@@ -5,12 +5,12 @@ public class Request : IEquatable<Request>
     public string Type {get;set;}
     public string Url {get;set;}
     public string Protocol {get;set;}
-    public List<string> Headers {get;set;}
+    public List<Tuple<string,string>> Headers {get;set;}
     public string Body {get;set;}
 
     public Request()
     {
-        Headers = new List<string>();
+        Headers = new List<Tuple<string,string>>();
     }
 
     public bool Equals(Request? other)

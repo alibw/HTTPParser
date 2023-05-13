@@ -42,9 +42,9 @@ content-type: application/json
             Type = "POST",
             Url = "https://example.com/comments",
             Protocol = "HTTP/1.1",
-            Headers = new List<string>()
+            Headers = new List<Tuple<string, string>>()
             {
-                "content-type:application/json"
+                new("content-type","application/json")
             },
             Body = @"{ 'name': 'sample', 'time': 'Wed, 21 Oct 2015 18:27:50 GMT' }"
             }
@@ -55,5 +55,17 @@ content-type: application/json
         var result = parser.Parse();
         Assert.AreEqual(requests,result);
     }
-    
+
+    [Test]
+    public void SendRequestTest()
+    {
+        var parser = new Parser();
+        parser.Input = @"GET http://localhost:5000/ HTTP/1.1 ###";
+
+        var client = new HttpClient();
+            foreach(var item in parser.Parse())
+            {
+                parser.SendRequest(item);
+            }
+    }
 }
