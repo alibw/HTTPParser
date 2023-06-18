@@ -11,7 +11,7 @@ public class Test
 
 GET https://example.com/topics/1 HTTP/1.1
 < {%
- client.test("""", function() {
+client.test("""", function() {
 client.assert(client.global.get(""product"").UnitPrice === 101);
 client.assert(client.global.get(""product"").UnitStock === 102);
 });
@@ -43,8 +43,10 @@ content-type: application/json
                 Protocol = "HTTP/1.1",
                 CodeblockLines = new List<string>()
                 {
+                    @"client.test("""", function() {",
                     @"client.assert(client.global.get(""product"").UnitPrice === 101);",
-                    @"client.assert(client.global.get(""product"").UnitStock === 102);"
+                    @"client.assert(client.global.get(""product"").UnitStock === 102);",
+                    "});"
                 }
             },
             new ()
