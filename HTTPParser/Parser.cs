@@ -5,26 +5,19 @@ namespace HTTPParser;
 public class Parser
 {
     public string Input;
-        private IEnumerable<char> splitters = new []
+    public List<string> Split()
         {
-            ' ',
-            '\t',
-            '\r',
-            '\n'
-        };
-        public List<string> Split()
-        {
-            return Input.Split((char[]?)splitters, StringSplitOptions.RemoveEmptyEntries).ToList();
+            return Input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
         public List<Request> Parse()
         {
             var requests = new List<Request>();
             var splitted = Split();
             var request = new Request();
-            int bodyStartIndex = 0;
-            bool typeFilled = false;
-            bool urlFilled = false;
-            bool protocolFilled = false;
+            bool readingBody = false;
+            bool firstLineRead = false;
+            bool readingCodeBlock = false;
+            string body = "";
 
             for (int i = 0; i < splitted.Count ; i++)
             {
@@ -33,46 +26,52 @@ public class Parser
                     if(!string.IsNullOrEmpty(request.Url) && !string.IsNullOrEmpty(request.Type))
                        requests.Add(request);
                     request = new Request();
-                    typeFilled = false;
-                    urlFilled = false;
-                    protocolFilled = false;
-                    continue;
-                }
-            
-                if(!typeFilled)
-                {
-                    request.Type = splitted[i];
-                    typeFilled = true;
+                    firstLineRead = false;
                     continue;
                 }
 
-                if(typeFilled && !urlFilled)
+                if (!firstLineRead)
                 {
-                    request.Url = splitted[i];
-                    urlFilled = true;
+                    var firstLine = splitted[i].Split(new[] {' '}, 3);
+                    request.Type = firstLine[0];
+                    request.Url = firstLine[1];
+                    request.Protocol = 2 < firstLine.Length ?  firstLine[2] : null;
+                    firstLineRead = true;
                     continue;
                 }
-
-                if(typeFilled && urlFilled && !protocolFilled)
+                
+                if (firstLineRead && !readingBody && !readingCodeBlock)
                 {
-                    request.Protocol = splitted[i];
-                    protocolFilled = true;
+                    var header = splitted[i].Split(':');
+                    if(header.Length == 2)
+                    request.Headers.Add(new Tuple<string, string>(header[0],header[1]));
+                }
+
+                if (splitted[i] == "{%")
+                {
+                    readingCodeBlock = true;
                     continue;
                 }
-
-                if (i > 0 && splitted[i - 1].ToCharArray().Last() == ':' && bodyStartIndex == 0)
+                if (splitted[i] == "%}")
                 {
-                    request.Headers.Add(new Tuple<string, string>(splitted[i - 1].Replace(":",""),splitted[i]));
+                    readingCodeBlock = false;
+                    continue;
                 }
-
-                if(splitted[i] == "{")            
-                    bodyStartIndex = i;
+                /*if (readingCodeBlock)
+                {
+                    if()
+                }*/
+                
+                if (splitted[i] == "{")
+                    readingBody = true;
+                if (readingBody)
+                    body += $"{splitted[i]}{Environment.NewLine}";
+                
 
                 if (splitted[i] == "}")
                 {
-                    var body = splitted.Skip(bodyStartIndex).Take(i - bodyStartIndex + 1);
-                    request.Body = String.Join(" ",body);
-                    bodyStartIndex = 0;
+                    request.Body = body;
+                    readingBody = false;
                     requests.Add(request);
                     request = new Request();
                 }
