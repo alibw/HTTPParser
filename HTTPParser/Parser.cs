@@ -60,8 +60,7 @@ public class Parser
 
                 if (readingCodeBlock)
                 {
-                    if (splitted[i].Contains("assert"))
-                        request.CodeblockLines.Add(splitted[i]);
+                    request.CodeblockLines.Add(splitted[i]);
                     continue;
                 }
 
