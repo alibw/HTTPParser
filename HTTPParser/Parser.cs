@@ -47,7 +47,7 @@ public class Parser
                     request.Headers.Add(new Tuple<string, string>(header[0],header[1]));
                 }
 
-                if (splitted[i] == "{%")
+                if (splitted[i] == "< {%")
                 {
                     readingCodeBlock = true;
                     continue;
@@ -57,11 +57,13 @@ public class Parser
                     readingCodeBlock = false;
                     continue;
                 }
-                /*if (readingCodeBlock)
+
+                if (readingCodeBlock)
                 {
-                    if()
-                }*/
-                
+                    request.CodeblockLines.Add(splitted[i]);
+                    continue;
+                }
+
                 if (splitted[i] == "{")
                     readingBody = true;
                 if (readingBody)

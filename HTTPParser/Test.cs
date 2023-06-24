@@ -10,7 +10,12 @@ public class Test
 ###
 
 GET https://example.com/topics/1 HTTP/1.1
-
+< {%
+client.test("""", function() {
+client.assert(client.global.get(""product"").UnitPrice === 101);
+client.assert(client.global.get(""product"").UnitStock === 102);
+});
+%}
 ###
 
 POST https://example.com/comments HTTP/1.1
@@ -35,7 +40,14 @@ content-type: application/json
             {
                 Type = "GET",
                 Url = "https://example.com/topics/1",
-                Protocol = "HTTP/1.1"
+                Protocol = "HTTP/1.1",
+                CodeblockLines = new List<string>()
+                {
+                    @"client.test("""", function() {",
+                    @"client.assert(client.global.get(""product"").UnitPrice === 101);",
+                    @"client.assert(client.global.get(""product"").UnitStock === 102);",
+                    "});"
+                }
             },
             new ()
             {
@@ -56,7 +68,6 @@ content-type: application/json
         Parser parser = new Parser();
         parser.Input = script;
         var result = parser.Parse();
-        var f = result.ElementAt(2).Headers.Intersect(requests.ElementAt(2).Headers).Any();
         Assert.AreEqual(requests,result);
     }
 
