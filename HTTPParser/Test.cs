@@ -44,15 +44,19 @@ content-type: application/json
             Protocol = "HTTP/1.1",
             Headers = new List<Tuple<string, string>>()
             {
-                new("content-type","application/json")
+                new("content-type"," application/json")
             },
-            Body = @"{ 'name': 'sample', 'time': 'Wed, 21 Oct 2015 18:27:50 GMT' }"
-            }
+            Body = @"{
+    'name': 'sample',
+    'time': 'Wed, 21 Oct 2015 18:27:50 GMT'
+}
+"}
 
         };
         Parser parser = new Parser();
         parser.Input = script;
         var result = parser.Parse();
+        var f = result.ElementAt(2).Headers.Intersect(requests.ElementAt(2).Headers).Any();
         Assert.AreEqual(requests,result);
     }
 
